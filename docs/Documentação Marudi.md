@@ -8,7 +8,7 @@
 
 **2. Comparativo de Nomenclaturas e Serviços entre Provedores** 
 
-**![][image1]**
+<img width="1600" height="549" alt="Code_Generated_Image" src="https://github.com/user-attachments/assets/e4c2afc1-1d23-4d5e-a8e1-d9807503409f" />
 
 **3\. Levantamento e Estimativa de Custos em Nuvem**
 

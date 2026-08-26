@@ -48,3 +48,13 @@ O projeto é dividido nas seguintes disciplinas do módulo:
   - Painel/Dashboard de consultas agendadas.
   - Cadastro e gerenciamento de dentistas e procedimentos.
   - Gestão de horários de atendimento.
+
+---
+
+## 📚 Documentação do Projeto:
+
+A documentação detalhada de requisitos e regras de negócio da aplicação encontra-se na pasta [`/docs`](./docs):
+
+- 📋[Requisitos Funcionais (RF)](./docs/rf.md)
+- ⚙️[Requisitos NÃO Funcionais (RNF)](./docs/rnf.md)
+- ⚖️[Regras de Negócios (RN)](./docs/rn.md)

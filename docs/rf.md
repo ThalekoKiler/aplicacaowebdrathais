@@ -1,6 +1,6 @@
 # 📋 Requisitos Funcionais (RF)
 
-- Os requisitos funcionais descrevem as ações, recursos e comportamentos que o sistema deve executar.
+Os requisitos funcionais descrevem as ações, recursos e comportamentos que o sistema deve executar.
 
 ## 👤 Módulo 1: Gestão de Usuários e Autenticação
 - **[RF001] Cadastro e Autenticação de Pacientes:** O sistema deve permitir que pacientes se cadastrem e façam login na plataforma.

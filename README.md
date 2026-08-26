@@ -58,3 +58,4 @@ A documentação detalhada de requisitos e regras de negócio da aplicação enc
 - 📋[Requisitos Funcionais (RF)](./docs/rf.md)
 - ⚙️[Requisitos NÃO Funcionais (RNF)](./docs/rnf.md)
 - ⚖️[Regras de Negócios (RN)](./docs/rn.md)
+- 📋[Documentação Marudi](.docs/DocumentaçãoMarudi.md)

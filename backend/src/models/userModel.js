@@ -26,7 +26,7 @@ const UserModel = {
         return rows[0];
     },
 
-    // Criando um usuário
+    // CREATE
     async create({ nome, email, senha, telefone, tipo }) {
         const hashedPassword = await hashPassword(senha);
 
@@ -42,6 +42,51 @@ const UserModel = {
             tipo || 'PACIENTE'
         ]);
         return result.insertId;
+    },
+
+    // UPDATE
+    async update(id, { nome, email, senha, telefone, tipo }) {
+        if (senha) {
+            const hashedPassword = await hashPassword(senha);
+            const query = `
+                UPDATE usuarios
+                SET nome = ?, email = ?, senha = ?, telefone = ?, tipo = ?
+                WHERE id = ?
+            `;
+            const [result] = await pool.query(query, [
+                nome,
+                email,
+                hashedPassword,
+                telefone,
+                tipo || 'PACIENTE',
+                id
+            ]);
+            return result.affectedRows > 0;
+        }
+
+        const query = `
+            UPDATE usuarios
+            SET nome = ?, email = ?, telefone = ?, tipo = ?
+            WHERE id = ?
+        `;
+
+        const [result] = await pool.query(query, [
+            nome,
+            email,
+            telefone,
+            tipo || 'PACIENTE',
+            id
+        ]);
+        return result.affectedRows > 0;
+    },
+
+    // DELETE
+    async delete(id) {
+        const [result] = await pool.query(
+            'DELETE FROM usuarios WHERE id = ?',
+            [id]
+        );
+        return result.affectedRows > 0;
     }
 };
 

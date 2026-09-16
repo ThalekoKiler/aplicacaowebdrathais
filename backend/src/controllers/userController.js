@@ -47,6 +47,49 @@ const UserController = {
         } catch (error) {
             return res.status(500).json({ error: 'Erro ao criar usuário', details: error.message });
         }
+    },
+
+    // UPDATE 
+    async update(req, res) {
+        try {
+            const { id } = req.params;
+            const { nome, email, senha, telefone, tipo } = req.body;
+
+            if (!nome || !email || !telefone) {
+                return res.status(400).json({ error: 'Nome, email e telefone são obrigatórios para atualização!' });
+            }
+
+            // Verificando se o email informado já pertence a outro usuário
+            const existingUser = await UserModel.findByEmail(email);
+            if (existingUser && existingUser.id !== Number(id)) {
+                return res.status(409).json({ error: 'Este email já está em uso por outro usuário!' });
+            }
+
+            const updated = await UserModel.update(id, { nome, email, senha, telefone, tipo });
+            if (!updated) {
+                return res.status(404).json({ error: 'Usuário não encontrado para atualização!' });
+            }
+
+            return res.status(200).json({ message: 'Usuário atualizado com sucesso!' });
+        } catch (error) {
+            return res.status(500).json({ error: 'Erro ao atualizar usuário!', details: error.message });
+        }
+    },
+
+    // DELETE
+    async delete(req, res) {
+        try {
+            const { id } = req.params;
+            const deleted = await UserModel.delete(id);
+
+            if (!deleted) {
+                return res.status(404).json({ error: 'Usuário não encontrado para exclusão!' });
+            }
+
+            return res.status(200).json({ message: 'Usuário excluído com sucesso!' });
+        } catch (error) {
+            return res.status(500).json({ error: 'Erro ao excluír um usuário!', details: error.message });
+        }
     }
 };
 

@@ -4,7 +4,7 @@ const { body, validationResult } = require('express-validator');
 const handleValidationErrors = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res.status(422).json({ errors: errors.array() });
     }
     next();
 };
@@ -18,6 +18,7 @@ const validateUserCreation = [
     body('email')
         .trim()
         .notEmpty().withMessage('Email informado é inválido!')
+        .isEmail().withMessage('Informe um Email válido!')
         .normalizeEmail(),
     body('senha')
         .isLength({ min: 6 }).withMessage('A senha deve ter pelo menos 6 caracteres!'),
@@ -44,7 +45,23 @@ const validateAppointmentCreation = [
     handleValidationErrors
 ];
 
+// Validação para criação de Procedimentos (Catálogo)
+const validateProcedureCreation = [
+    body('nome')
+        .trim()
+        .notEmpty().withMessage('Nome do procedimento é obrigatório!')
+        .isLength({ min: 3 }).withMessage('Nome deve ter no mínimo 3 caracteres!'),
+    body('duracao_minutos')
+        .optional()
+        .isInt({ min: 5 }).withMessage('Duração deve ser um número inteiro de minutos!'),
+    body('preco')
+        .optional()
+        .isFloat({ min: 0 }).withMessage('Preço deve ser um valor numérico válido!'),
+    handleValidationErrors
+];
+
 module.exports = {
     validateUserCreation,
-    validateAppointmentCreation
+    validateAppointmentCreation,
+    validateProcedureCreation
 };

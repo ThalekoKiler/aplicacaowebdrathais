@@ -5,6 +5,7 @@ const { validateUserCreation } = require('../helpers/validators');
 const verifyToken = require('../helpers/verify-token');
 
 // ROTAS PÚBLICAS
+router.get('/cep/:cep', UserController.getAddressByCep);
 router.post('/', validateUserCreation, UserController.create);
 router.post('/login', UserController.login);
 

@@ -34,6 +34,7 @@ const validateUserCreation = [
 // Validação para criação de Agendamento
 const validateAppointmentCreation = [
     body('paciente_id')
+        .optional()
         .isInt({ min: 1 }).withMessage('paciente_id deve ser um número inteiro válido'),
     body('procedimento_id')
         .isInt({ min: 1 }).withMessage('procedimento_id deve ser um número inteiro válido'),

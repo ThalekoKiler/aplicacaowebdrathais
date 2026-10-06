@@ -2,18 +2,16 @@ const express = require('express');
 const router = express.Router();
 const UserController = require('../controllers/userController');
 const { validateUserCreation } = require('../helpers/validators');
+const verifyToken = require('../helpers/verify-token');
 
-// READ ALL
-router.get('/', UserController.getAll);
-// READ BY ID
-router.get('/:id', UserController.getById);
-// CREATE
+// ROTAS PÚBLICAS
 router.post('/', validateUserCreation, UserController.create);
-// LOGIN
 router.post('/login', UserController.login);
-// UPDATE
-router.put('/:id', UserController.update);
-// DELETE
-router.delete('/:id', UserController.delete);
+
+// ROTAS PROTEGIDAS (exigir token JWT)
+router.get('/', verifyToken, UserController.getAll);
+router.get('/:id', verifyToken, UserController.getById);
+router.put('/:id', verifyToken, UserController.update);
+router.delete('/:id', verifyToken, UserController.delete);
 
 module.exports = router;

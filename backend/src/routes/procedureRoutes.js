@@ -2,16 +2,15 @@ const express = require('express');
 const router = express.Router();
 const ProcedureController = require('../controllers/procedureController');
 const { validateProcedureCreation } = require('../helpers/validators');
+const verifyToken = require('../helpers/verify-token');
 
-// READ ALL
+// ROTAS PÚBLICAS 
 router.get('/', ProcedureController.getAll);
-// READ BY ID
 router.get('/:id', ProcedureController.getById);
-// CREATE
-router.post('/', validateProcedureCreation, ProcedureController.create);
-// UPDATE
-router.put('/:id', ProcedureController.update);
-// DELETE
-router.delete('/:id', ProcedureController.delete);
+
+// ROTAS PROTEGIDAS
+router.post('/', verifyToken, validateProcedureCreation, ProcedureController.create);
+router.put('/:id', verifyToken, ProcedureController.update);
+router.delete('/:id', verifyToken, ProcedureController.delete);
 
 module.exports = router;

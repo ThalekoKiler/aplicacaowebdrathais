@@ -1,9 +1,15 @@
 const RecordModel = require('../models/recordModel');
 
 const RecordController = {
-    // READ ALL
+    // READ ALL (exclusivo do ADMIN)
     async getAll(req, res) {
         try {
+            const user = req.user;
+
+            if (user && user.tipo !== 'CLINICA') {
+                return res.status(403).json({ error: 'Acesso negado: apenas admins podem listar todos os prontuários!' });
+            }
+
             const records = await RecordModel.findAll();
             return res.status(200).json(records);
         } catch (error) {
@@ -14,10 +20,16 @@ const RecordController = {
     // READ BY PACIENTE ID
     async getByPatientId(req, res) {
         try {
-            const pacienteId = parseInt(req.params.pacienteId, 10);
+            const pacienteId = Number(req.params.pacienteId);
+            const user = req.user;
 
-            if (isNaN(pacienteId)) {
+            if (!pacienteId) {
                 return res.status(400).json({ error: 'ID do paciente inválido' });
+            }
+
+            // Se for paciente, só pode consultar o seu próprio prontuário
+            if (user && user.tipo === 'PACIENTE' && user.id !== pacienteId) {
+                return res.status(403).json({ error: 'Acesso negado: você não tem permissão para acessar este prontuário' });
             }
 
             const record = await RecordModel.findByPatientId(pacienteId);
@@ -32,9 +44,14 @@ const RecordController = {
         }
     },
 
-    // CREATE
+    // CREATE (Apenas ADMIN/Dentista pode criar prontuário)
     async create(req, res) {
         try {
+            const user = req.user;
+            if (user && user.tipo !== 'CLINICA') {
+                return res.status(403).json({ error: 'Acesso negado: apenas administradores podem criar prontuários' });
+            }
+
             const { paciente_id, anamnese, historico_tratamento, controle_protese, follow_up_evolucao } = req.body;
 
             if (!paciente_id) {
@@ -60,10 +77,15 @@ const RecordController = {
         }
     },
 
-    // UPDATE
+    // UPDATE (Apenas ADMIN/Dentista pode atualizar prontuários)
     async update(req, res) {
         try {
-            const { pacienteId } = req.params;
+            const user = req.user;
+            if (user && user.tipo !== 'CLINICA') {
+                return res.status(403).json({ error: 'Acesso negado: apenas administradores podem atualizar prontuários' });
+            }
+
+            const pacienteId = Number(req.params.pacienteId);
             const { anamnese, historico_tratamento, controle_protese, follow_up_evolucao } = req.body;
 
             const updated = await RecordModel.updateByPatientId(pacienteId, {
@@ -83,10 +105,15 @@ const RecordController = {
         }
     },
 
-    // DELETE
+    // DELETE (Apenas ADMIN/Dentista pode exlcuir prontuário)
     async delete(req, res) {
         try {
-            const { pacienteId } = req.params;
+            const user = req.user;
+            if (user && user.tipo !== 'CLINICA') {
+                return res.status(403).json({ error: 'Acesso negado: apenas administradores podem excluir prontuários' });
+            }
+
+            const pacienteId = Number(req.params.pacienteId);
             const deleted = await RecordModel.deleteByPatientId(pacienteId);
 
             if (!deleted) {

@@ -1,5 +1,6 @@
 const UserModel = require('../models/userModel');
 const authHelper = require('../helpers/authHelper');
+const createUserToken = require('../helpers/create-user-token');
 
 const UserController = {
     // Listando usuarios
@@ -34,19 +35,27 @@ const UserController = {
             const { nome, email, senha, telefone, tipo } = req.body;
 
             if (!nome || !email || !senha || !telefone) {
-                return res.status(400).json({ error: 'Todos os campos obrigatórios devem ser preenchidos ' });
+                return res.status(400).json({ error: 'Todos os campos obrigatórios devem ser preenchidos!' });
             }
 
-            // Verifica duplicidade de email
+            // Verificar duplicidade do email
             const existingUser = await UserModel.findByEmail(email);
             if (existingUser) {
                 return res.status(409).json({ error: 'Email já cadastrado, utilize outro Email!' });
             }
 
-            const newUserId = await UserModel.create({ nome, email, senha, telefone, tipo });
+            // O próprio UserModel.create se encarrega de criptografar a senha
+            const newUserId = await UserModel.create({
+                nome,
+                email,
+                senha,
+                telefone,
+                tipo: tipo ? tipo.toUpperCase() : 'PACIENTE'
+            });
+
             return res.status(201).json({ id: newUserId, message: 'Usuário criado com sucesso!' });
         } catch (error) {
-            return res.status(500).json({ error: 'Erro ao criar usuário', details: error.message });
+            return res.status(500).json({ error: 'Erro ao criar um usuário', details: error.message });
         }
     },
 
@@ -65,31 +74,19 @@ const UserController = {
                 return res.status(422).json({ message: 'Não há usuário cadastrado com esse email' });
             }
 
-            // Confere a senha com o hash criptografado
+            // Confere a senha com o hash guardado
             const isPasswordValid = await authHelper.comparePassword(senha, user.senha);
             if (!isPasswordValid) {
                 return res.status(422).json({ message: 'Senha inválida!' });
             }
 
-            // Emitir o Token JWT
-            const token = authHelper.createToken(user);
-
-            return res.status(200).json({
-                message: 'Login realizado com sucesso!',
-                token,
-                usuario: {
-                    id: user.id,
-                    nome: user.nome,
-                    email: user.email,
-                    tipo: user.tipo
-                }
-            });
+            await createUserToken(user, req, res);
         } catch (error) {
             return res.status(500).json({ error: 'Erro ao realizar login!', details: error.message });
         }
     },
 
-    // UPDATE 
+    // UPDATE
     async update(req, res) {
         try {
             const { id } = req.params;
@@ -105,7 +102,14 @@ const UserController = {
                 return res.status(409).json({ error: 'Este email já está em uso por outro usuário!' });
             }
 
-            const updated = await UserModel.update(id, { nome, email, senha, telefone, tipo });
+            const updated = await UserModel.update(id, {
+                nome,
+                email,
+                senha,
+                telefone,
+                tipo: tipo ? tipo.toUpperCase() : undefined
+            });
+
             if (!updated) {
                 return res.status(404).json({ error: 'Usuário não encontrado para atualização!' });
             }
@@ -128,7 +132,7 @@ const UserController = {
 
             return res.status(200).json({ message: 'Usuário excluído com sucesso!' });
         } catch (error) {
-            return res.status(500).json({ error: 'Erro ao excluír um usuário!', details: error.message });
+            return res.status(500).json({ error: 'Erro ao excluir um usuário!', details: error.message });
         }
     }
 };

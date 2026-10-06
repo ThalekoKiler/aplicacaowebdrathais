@@ -53,6 +53,33 @@ const AppointmentModel = {
         return rows[0];
     },
 
+    // READ BY PACIENTE ID
+    async findByPacienteId(paciente_id) {
+        const query = `
+            SELECT 
+                a.id,
+                a.paciente_id,
+                u.nome AS paciente_nome,
+                u.telefone AS paciente_telefone,
+                a.procedimento_id,
+                p.nome AS procedimento_nome,
+                p.duracao_minutos,
+                a.data_hora_inicio,
+                a.data_hora_fim,
+                a.estado,
+                a.is_emergencia,
+                a.observacao,
+                a.criado_em
+            FROM agendamentos a
+            INNER JOIN usuarios u ON a.paciente_id = u.id
+            INNER JOIN procedimento p ON a.procedimento_id = p.id
+            WHERE a.paciente_id = ?
+            ORDER BY a.data_hora_inicio ASC
+        `;
+        const [rows] = await pool.query(query, [paciente_id]);
+        return rows;
+    },
+
     // Checar conflitos de horário
     async checkConflict(inicio, fim, excludeId = null) {
         let query = `

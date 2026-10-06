@@ -17,6 +17,7 @@ app.use('/agendamentos', appointmentRoutes);
 app.use('/prontuarios', recordRoutes);
 app.use('/procedimentos', procedureRoutes);
 
+// Isso aq servirá só para testar se a API está rodando e Online
 app.get('/status', (req, res) => {
     res.status(200).json({ status: 'API Online funcionando!' });
 });

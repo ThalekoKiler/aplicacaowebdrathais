@@ -11,6 +11,8 @@ router.use(verifyToken);
 router.get('/', AppointmentController.getAll);
 // READ BY ID
 router.get('/:id', AppointmentController.getById);
+// EXPORT EXCEL
+router.get('/exportar/excel', AppointmentController.exportExcelReport);
 // CREATE
 router.post('/', validateAppointmentCreation, AppointmentController.create);
 // UPDATE COMPLETO

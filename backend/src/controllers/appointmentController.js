@@ -1,7 +1,84 @@
 const AppointmentModel = require('../models/appointmentModel');
 const ProcedureModel = require('../models/procedureModel');
+const ExcelJS = require('exceljs');
 
 const AppointmentController = {
+    // Exportar agendamentos em formato EXCEL nativo (.xlsx)
+    async exportExcelReport(req, res) {
+        try {
+            const user = req.user;
+            if (user && user.tipo !== 'CLINICA') {
+                return res.status(403).json({ error: 'Acesso Negado: apenas a clínica tem acesso' });
+            }
+
+            const appointments = await AppointmentModel.findAll();
+
+            const workbook = new ExcelJS.Workbook();
+            workbook.creator = 'Clínica Odontológica Dra Thaís';
+            workbook.created = new Date();
+
+            const worksheet = workbook.addWorksheet('Relatório de Consultas');
+
+            // Definição das colunas
+            worksheet.columns = [
+                { header: 'ID', key: 'id', width: 8 },
+                { header: 'Data', key: 'data', width: 14 },
+                { header: 'Início', key: 'inicio', width: 12 },
+                { header: 'Término', key: 'fim', width: 12 },
+                { header: 'Paciente', key: 'paciente', width: 28 },
+                { header: 'Telefone', key: 'telefone', width: 18 },
+                { header: 'Procedimento', key: 'procedimento', width: 26 },
+                { header: 'Duração (min)', key: 'duracao', width: 16 },
+                { header: 'Status', key: 'estado', width: 16 },
+                { header: 'Emergência', key: 'emergencia', width: 14 }
+            ];
+
+            // Estilizar o cabeçalho
+            const headerRow = worksheet.getRow(1);
+            headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+            headerRow.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FF1F4E78' }
+            };
+            headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+            // Inserção das linhas
+            appointments.forEach(item => {
+                const dataInicio = new Date(item.data_hora_inicio);
+                const dataFim = new Date(item.data_hora_fim);
+
+                worksheet.addRow({
+                    id: item.id,
+                    data: dataInicio.toLocaleDateString('pt-BR'),
+                    inicio: dataInicio.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+                    fim: dataFim.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+                    paciente: item.paciente_nome,
+                    telefone: item.paciente_telefone || 'Não informado',
+                    procedimento: item.procedimento_nome,
+                    duracao: item.duracao_minutos,
+                    estado: item.estado,
+                    emergencia: item.is_emergencia ? 'Sim' : 'Não'
+                });
+            });
+
+            res.setHeader(
+                'Content-Type',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            );
+            res.setHeader(
+                'Content-Disposition',
+                'attachment; filename=relatorio_agendamentos.xlsx'
+            );
+
+            await workbook.xlsx.write(res);
+            return res.end();
+        } catch (error) {
+            return res.status(500).json({ error: 'Erro ao gerar planílha Excel', details: error.message });
+        }
+    },
+
+
     // READ ALL (Se for paciente, traz só as dele; se for admin, traz todas)
     async getAll(req, res) {
         try {

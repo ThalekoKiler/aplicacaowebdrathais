@@ -3,6 +3,35 @@ const authHelper = require('../helpers/authHelper');
 const createUserToken = require('../helpers/create-user-token');
 
 const UserController = {
+    // Consulta pública da API ViaCep
+    async getAddressByCep(req, res) {
+        try {
+            const { cep } = req.params;
+            const cleanCep = cep.replace(/\D/g, ''); // remove traços e pontos
+
+            if (cleanCep.length !== 8) {
+                return res.status(400).json({ error: 'CEP inválido. Deve conter 8 dígitos' });
+            }
+
+            const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+            const data = await response.json();
+
+            if (data.erro) {
+                return res.status(404).json({ error: 'CEP não encontrado!' });
+            }
+
+            return res.status(200).json({
+                cep: data.cep,
+                logradouro: data.logradouro,
+                bairro: data.bairro,
+                cidade: data.localidade,
+                uf: data.uf
+            });
+        } catch (error) {
+            return res.status(500).json({ error: 'Erro ao consultar serviço de CEP', details: error.message });
+        }
+    },
+
     // Listando usuarios
     async getAll(req, res) {
         try {
@@ -32,7 +61,20 @@ const UserController = {
     // Criando Usuário
     async create(req, res) {
         try {
-            const { nome, email, senha, telefone, tipo } = req.body;
+            const {
+                nome,
+                email,
+                senha,
+                telefone,
+                cep,
+                logradouro,
+                numero,
+                complemento,
+                bairro,
+                cidade,
+                uf,
+                tipo
+            } = req.body;
 
             if (!nome || !email || !senha || !telefone) {
                 return res.status(400).json({ error: 'Todos os campos obrigatórios devem ser preenchidos!' });
@@ -44,16 +86,24 @@ const UserController = {
                 return res.status(409).json({ error: 'Email já cadastrado, utilize outro Email!' });
             }
 
-            // O próprio UserModel.create se encarrega de criptografar a senha
+            // Passa a senha em texto pro Model, que vai criptografar internamente
             const newUserId = await UserModel.create({
                 nome,
                 email,
                 senha,
                 telefone,
+                cep,
+                logradouro,
+                numero,
+                complemento,
+                bairro,
+                cidade,
+                uf,
                 tipo: tipo ? tipo.toUpperCase() : 'PACIENTE'
             });
 
-            return res.status(201).json({ id: newUserId, message: 'Usuário criado com sucesso!' });
+            const newUser = await UserModel.findById(newUserId);
+            return createUserToken(newUser, req, res);
         } catch (error) {
             return res.status(500).json({ error: 'Erro ao criar um usuário', details: error.message });
         }
@@ -74,7 +124,7 @@ const UserController = {
                 return res.status(422).json({ message: 'Não há usuário cadastrado com esse email' });
             }
 
-            // Confere a senha com o hash guardado
+            // Confere a senha com o hash guardado no banco
             const isPasswordValid = await authHelper.comparePassword(senha, user.senha);
             if (!isPasswordValid) {
                 return res.status(422).json({ message: 'Senha inválida!' });
@@ -90,13 +140,25 @@ const UserController = {
     async update(req, res) {
         try {
             const { id } = req.params;
-            const { nome, email, senha, telefone, tipo } = req.body;
+            const {
+                nome,
+                email,
+                senha,
+                telefone,
+                cep,
+                logradouro,
+                numero,
+                complemento,
+                bairro,
+                cidade,
+                uf,
+                tipo
+            } = req.body;
 
             if (!nome || !email || !telefone) {
                 return res.status(400).json({ error: 'Nome, email e telefone são obrigatórios para atualização!' });
             }
 
-            // Verificando se o email informado já pertence a outro usuário
             const existingUser = await UserModel.findByEmail(email);
             if (existingUser && existingUser.id !== Number(id)) {
                 return res.status(409).json({ error: 'Este email já está em uso por outro usuário!' });
@@ -105,8 +167,15 @@ const UserController = {
             const updated = await UserModel.update(id, {
                 nome,
                 email,
-                senha,
+                senha, // O Model verifica se existe e faz o hash se necessário
                 telefone,
+                cep,
+                logradouro,
+                numero,
+                complemento,
+                bairro,
+                cidade,
+                uf,
                 tipo: tipo ? tipo.toUpperCase() : undefined
             });
 

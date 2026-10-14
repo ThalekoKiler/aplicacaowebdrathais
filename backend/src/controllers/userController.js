@@ -189,6 +189,27 @@ const UserController = {
         }
     },
 
+    // UPDATE PERFIL
+    async updatePerfil(req, res) {
+        try {
+            const userId = req.user.id;
+            const { nome, email, telefone } = req.body;
+
+            if (!nome || !email || !telefone) {
+                return res.status(400).json({ error: "Nome, email e telefone são obrigatórios! " });
+            }
+
+            await UserModel.updatePerfil(userId, { nome, email, telefone });
+
+            return res.status(200).json({
+                message: "Perfil atualizado com sucesso!",
+                user: { id: userId, nome, email, telefone }
+            });
+        } catch (error) {
+            return res.status(500).json({ error: "Erro ao atualizar perfil", details: error.message });
+        }
+    },
+
     // DELETE
     async delete(req, res) {
         try {

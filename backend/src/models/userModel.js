@@ -107,6 +107,17 @@ const UserModel = {
         return result.affectedRows > 0;
     },
 
+    // ATUALIZAÇÃO PARCIAL (Apenas dados de contato do perfil do paciente)
+    async updatePerfil(id, { nome, email, telefone }) {
+        const query = `
+            UPDATE usuarios
+            SET nome = ?, email = ?, telefone = ?
+            WHERE id = ?
+        `;
+        const [result] = await pool.query(query, [nome, email, telefone, id]);
+        return result.affectedRows > 0;
+    },
+
     // DELETE
     async delete(id) {
         const [result] = await pool.query(

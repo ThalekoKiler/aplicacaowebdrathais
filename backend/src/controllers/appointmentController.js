@@ -79,7 +79,7 @@ const AppointmentController = {
     },
 
 
-    // READ ALL (Se for paciente, traz só as dele; se for admin, traz todas)
+    // READ ALL
     async getAll(req, res) {
         try {
             const user = req.user;
@@ -93,6 +93,24 @@ const AppointmentController = {
             return res.status(200).json(appointments);
         } catch (error) {
             return res.status(500).json({ error: 'Erro ao buscar agendamentos', details: error.message });
+        }
+    },
+
+    // HORÁRIOS OCUPADOS (Apenas horários para bloquear a grade, sem dados pessoais)
+    async getOcupados(req, res) {
+        try {
+            const appointments = await AppointmentModel.findAll();
+            // Retorna somente os horários das consultas que não estão canceladas
+            const ocupados = appointments
+                .filter(app => app.estado !== 'CANCELADO')
+                .map(app => ({
+                    data_hora_inicio: app.data_hora_inicio,
+                    data_hora_fim: app.data_hora_fim
+                }));
+
+            return res.status(200).json(ocupados);
+        } catch (error) {
+            return res.status(500).json({ error: 'Erro ao buscar horários ocupados', details: error.message });
         }
     },
 

@@ -7,6 +7,8 @@ const verifyToken = require('../helpers/verify-token');
 // Todas as rotas abaixo passam a exigir o token JWT
 router.use(verifyToken);
 
+// HORÁRIOS OCUPADOS
+router.get('/ocupados', AppointmentController.getOcupados);
 // READ ALL 
 router.get('/', AppointmentController.getAll);
 // READ BY ID

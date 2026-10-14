@@ -12,6 +12,7 @@ router.post('/login', UserController.login);
 // ROTAS PROTEGIDAS (exigir token JWT)
 router.get('/', verifyToken, UserController.getAll);
 router.get('/:id', verifyToken, UserController.getById);
+router.patch('/perfil', verifyToken, UserController.updatePerfil);
 router.put('/:id', verifyToken, UserController.update);
 router.delete('/:id', verifyToken, UserController.delete);
 

@@ -17,6 +17,9 @@ const createUserToken = async (user, req, res) => {
         message: 'Autenticado com sucesso!',
         token: token,
         userId: user.id,
+        nome: user.nome,
+        email: user.email,
+        telefone: user.telefone,
         tipo: user.tipo
     });
 };

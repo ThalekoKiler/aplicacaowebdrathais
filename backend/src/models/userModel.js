@@ -118,6 +118,18 @@ const UserModel = {
         return result.affectedRows > 0;
     },
 
+    // Buscar APENAS usuários que sejam PACIENTES
+    async findPatients() {
+        const query = `
+            SELECT id, nome, email, telefone, criado_em
+            FROM usuarios
+            WHERE tipo = 'PACIENTE'
+            ORDER BY nome ASC
+        `;
+        const [rows] = await pool.query(query);
+        return rows;
+    },
+
     // DELETE
     async delete(id) {
         const [result] = await pool.query(

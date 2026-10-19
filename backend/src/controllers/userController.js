@@ -58,6 +58,16 @@ const UserController = {
         }
     },
 
+    // Listar APENAS usuários do tipo PACIENTE (para o painel da CLINICA)
+    async getPacientes(req, res) {
+        try {
+            const pacientes = await UserModel.findPatients();
+            return res.status(200).json(pacientes);
+        } catch (error) {
+            return res.status(500).json({ error: 'Erro ao buscar pacientes', details: error.message });
+        }
+    },
+
     // Criando Usuário
     async create(req, res) {
         try {

@@ -10,6 +10,7 @@ router.post('/', validateUserCreation, UserController.create);
 router.post('/login', UserController.login);
 
 // ROTAS PROTEGIDAS (exigir token JWT)
+router.get('/pacientes', verifyToken, UserController.getPacientes);
 router.get('/', verifyToken, UserController.getAll);
 router.get('/:id', verifyToken, UserController.getById);
 router.patch('/perfil', verifyToken, UserController.updatePerfil);
